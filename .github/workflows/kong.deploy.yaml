@@ -1,6 +1,8 @@
 # .github/workflows/deploy-kong.yml
 name: Deploy Kong DB-less Config to EC2
 
+# Versão 4.0
+
 on:
   push:
     paths:
