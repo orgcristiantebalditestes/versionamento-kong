@@ -1,6 +1,6 @@
 _format_version: "3.0"
 
-# v5 disparar workflow
+# v6 disparar workflow
 
 services:
   - name: kong-apigateway
