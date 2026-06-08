@@ -30,16 +30,16 @@ jobs:
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-add - <<< "${{ secrets.EC2_SSH_KEY }}"
-          scp -o StrictHostKeyChecking=no -r  kong.yaml ec2-user@${{secrets.EC2_PUBLIC_IP}}:/home/ec2-user/kong.yaml
+          scp -o StrictHostKeyChecking=no kong.yaml ubuntu@${{ secrets.EC2_PUBLIC_IP }}:/home/ubuntu/kong.yaml
 
       - name: Restart
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.EC2_PUBLIC_IP }}
-          username: ec2-user
+          username: ubuntu
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            sudo mv /home/ec2-user/kong.yaml /etc/kong/kong.yaml
+            sudo mv /home/ubuntu/kong.yaml /etc/kong/kong.yaml
             ls -al
             sudo kong restart
