@@ -1,0 +1,45 @@
+# .github/workflows/deploy-kong.yml
+name: Deploy Kong DB-less Config to EC2
+
+on:
+  push:
+    paths:
+      - kong.yaml
+
+jobs:
+  kong-ci-cd:
+    runs-on: ubuntu-latest
+    environment:
+      name: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup decK
+        uses: kong/setup-deck@v1
+        with:
+          deck-version: '1.5.0'  # ou defina uma versão específica como '1.30.0'
+
+      - name: Validate
+        run: |
+          deck validate --state kong.yaml
+
+      - name: Deploy to AWS
+        env:
+           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+        run: |
+          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
+          ssh-add - <<< "${{ secrets.EC2_SSH_KEY }}"
+          scp -o StrictHostKeyChecking=no -r  kong.yaml ec2-user@${{secrets.EC2_PUBLIC_IP}}:/home/ec2-user/kong.yaml
+
+      - name: Restart
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_PUBLIC_IP }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            sudo mv /home/ec2-user/kong.yaml /etc/kong/kong.yaml
+            ls -al
+            sudo kong restart

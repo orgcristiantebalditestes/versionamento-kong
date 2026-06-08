@@ -1,0 +1,12 @@
+_format_version: "3.0"
+
+services:
+  - name: kong-apigateway
+    host: httpbin.konghq.com
+    port: 80
+    protocol: http
+    routes:
+      - name: httpbin-konghq
+        paths:
+          - /
+        strip_path: true
